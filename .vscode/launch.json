@@ -18,6 +18,19 @@
 			],
 			"console": "terminal",
 			"templateFor": "bin"
+		},
+		{
+			"name": "Web Agent (_sandbox folder)",
+			"request": "launch",
+			"type": "dart",
+			"cwd": "_sandbox",
+			"program": "../bin/main.dart",
+			"args": [
+				"--log-file",
+				"../logs/trace.txt",
+				"--web",
+				"-p8080"
+			]
 		}
 	]
 }
