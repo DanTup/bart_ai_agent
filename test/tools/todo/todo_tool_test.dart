@@ -49,14 +49,14 @@ void main() {
     test('fails to complete task with no task text', () {
       expect(
         () => tool.execute({'operation': 'complete'}, context),
-        throwsToolException('A task description must be provided to complete a task.'),
+        throwsToolException('A task description must be provided.'),
       );
     });
 
     test('fails to complete task with empty task text', () {
       expect(
         () => tool.execute({'operation': 'complete', 'task': ''}, context),
-        throwsToolException('A task description must be provided to complete a task.'),
+        throwsToolException('A task description must be provided.'),
       );
     });
 

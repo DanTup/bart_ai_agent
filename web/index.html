@@ -73,17 +73,23 @@
 		};
 
 		function displayMessage(message) {
-			if (message.type === 'todo_list') {
-				updateTodoList(message.tasks || []);
-				return;
-			}
-
 			const div = document.createElement('div');
 			div.className = 'message';
 
 			switch (message.type) {
+				case 'system':
+					div.className += ' system';
+					// TODO(dantup): Sanitize
+					div.innerHTML = 'System: ' + marked.parse(message.content);
+					break;
+				case 'user':
+					// TODO(dantup): Sanitize
+					div.className += ' user';
+					div.textContent = 'You: ' + marked.parse(message.content);
+					break;
 				case 'assistant':
 					div.className += ' assistant';
+					// TODO(dantup): Sanitize
 					div.innerHTML = 'Agent: ' + marked.parse(message.content);
 					break;
 				case 'tool_call':
@@ -98,14 +104,9 @@
 					const workingDivs = chat.querySelectorAll('.working');
 					workingDivs.forEach(d => d.remove());
 					return;
-				case 'system':
-					div.className += ' system';
-					div.innerHTML = marked.parse(message.content);
-					break;
-				case 'user':
-					div.className += ' user';
-					div.textContent = 'You: ' + message.content;
-					break;
+				case 'todo_list':
+					updateTodoList(message.tasks || []);
+					return;
 			}
 
 			chat.appendChild(div);

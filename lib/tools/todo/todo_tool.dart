@@ -39,9 +39,6 @@ class TodoTool extends Tool {
           todoList._add(taskText);
           return 'Added task "$taskText".';
         case 'complete':
-          if (taskText == null || taskText.isEmpty) {
-            throw ToolException('A task description must be provided to complete a task.');
-          }
           todoList._complete(taskText);
           return 'Completed task "$taskText".';
         case 'remove':
