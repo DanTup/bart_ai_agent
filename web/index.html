@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Dart Agent</title>
+	<style>
+		body { font-family: Arial, sans-serif; margin: 20px; }
+		#chat { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+		#input { width: 100%; padding: 5px; resize: vertical; min-height: 40px; }
+		.message { margin-bottom: 10px; }
+		.assistant { color: blue; }
+		.tool { color: green; }
+		.working { color: orange; font-style: italic; }
+		.system { color: gray; font-style: italic; }
+		.user { color: black; font-weight: bold; }
+		.instructions { font-size: 12px; color: #666; margin-top: 5px; }
+		.message code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 3px; font-family: 'Courier New', monospace; }
+		.message pre { background-color: #f4f4f4; padding: 10px; border-radius: 3px; overflow-x: auto; margin: 10px 0; }
+		.message pre code { background-color: transparent; padding: 0; }
+		.message h1, .message h2, .message h3 { margin: 10px 0 5px 0; color: #333; }
+		.message h1 { font-size: 1.4em; }
+		.message h2 { font-size: 1.2em; }
+		.message h3 { font-size: 1.1em; }
+		.message ul { margin: 10px 0; padding-left: 20px; }
+		.message li { margin: 5px 0; }
+		.message a { color: #0066cc; text-decoration: underline; }
+		.message a:hover { color: #004499; }
+	</style>
+</head>
+<body>
+	<h1>Dart Agent</h1>
+	<div id="chat"></div>
+	<textarea id="input" placeholder="Type your message..." onkeydown="handleKeyDown(event)"></textarea>
+	<button onclick="sendMessage()">Send</button>
+	<div class="instructions">Press Enter or Ctrl+Enter to send. Press Shift+Enter for a new line.</div>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.umd.min.js" integrity="sha512-V6rGY7jjOEUc7q5Ews8mMlretz1Vn2wLdMW/qgABLWunzsLfluM0FwHuGjGQ1lc8jO5vGpGIGFE+rTzB+63HdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<script>
+		const ws = new WebSocket('ws://' + window.location.host + '/ws');
+		const chat = document.getElementById('chat');
+		const input = document.getElementById('input');
+
+		ws.onmessage = function(event) {
+			const data = JSON.parse(event.data);
+			displayMessage(data);
+		};
+
+		function displayMessage(message) {
+			const div = document.createElement('div');
+			div.className = 'message';
+
+			switch (message.type) {
+				case 'assistant':
+					div.className += ' assistant';
+					// TODO(dantup): Sanitize
+					div.innerHTML = 'Agent: ' + marked.parse(message.content);
+					break;
+				case 'tool_call':
+					div.className += ' tool';
+					div.textContent = 'Tool called: ' + message.toolName;
+					break;
+				case 'working':
+					div.className += ' working';
+					div.textContent = 'Working: ' + message.reason;
+					break;
+				case 'stop_working':
+					// Remove working indicator
+					const workingDivs = chat.querySelectorAll('.working');
+					workingDivs.forEach(d => d.remove());
+					break;
+				case 'system':
+					div.className += ' system';
+					// TODO(dantup): Sanitize
+					div.innerHTML = marked.parse(message.content);
+					break;
+				case 'user':
+					div.className += ' user';
+					div.textContent = 'You: ' + message.content;
+					break;
+			}
+
+			chat.appendChild(div);
+			chat.scrollTop = chat.scrollHeight;
+		}
+
+		function sendMessage() {
+			const content = input.value.trim();
+			if (content) {
+				// Display user message
+				displayMessage({ type: 'user', content: content });
+				// Send to server
+				ws.send(JSON.stringify({ type: 'input', content: content }));
+				input.value = '';
+			}
+		}
+
+		function handleKeyDown(event) {
+			if (event.key === 'Enter') {
+				if (event.ctrlKey || !event.shiftKey) {
+					event.preventDefault();
+					sendMessage();
+				}
+				// If Shift+Enter, allow default behavior (newline)
+			}
+		}
+	</script>
+</body>
+</html>
