@@ -21,6 +21,14 @@ abstract class Agent {
   /// The system message to be included when accessing the LLM.
   final String? systemMessage;
 
+  /// Marks that the agent is working.
+  ///
+  /// This may show some kind of progress indicator/spinner to the user.
+  void startWorking(String reason);
+
+  /// Marks that the agent is no longer working.
+  void stopWorking();
+
   /// Shows output to the user.
   void showOutput(OutputMessage message);
 
