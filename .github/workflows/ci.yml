@@ -17,3 +17,4 @@ jobs:
       - run: dart analyze
       - run: dart format --set-exit-if-changed .
       - run: dart test
+      - run: dart test integration_test
