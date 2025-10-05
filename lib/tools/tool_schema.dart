@@ -42,6 +42,9 @@ class ToolParameters {
   Map<String, Object?> toJson() => {
     'type': 'object',
     'properties': properties.map((key, value) => MapEntry(key, value.toJson())),
-    'required': properties.entries.where((entry) => entry.value.required).map((entry) => entry.key).toList(),
+    'required': properties.entries
+        .where((entry) => entry.value.required)
+        .map((entry) => entry.key)
+        .toList(),
   };
 }
