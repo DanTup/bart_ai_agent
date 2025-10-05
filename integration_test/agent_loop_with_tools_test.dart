@@ -14,15 +14,18 @@ const mode = TestMode.useSnapshots;
 
 const logLevel = Level.FINE;
 
+late final Directory tempProjectDir;
+late final TestApiClient client;
+late final ApiClient? realApi;
+late final TestAgent? _agent;
+
+TestAgent get agent => _agent!;
+set agent(TestAgent agent) => _agent = agent;
+
 void main() {
   _setUpLogging();
 
   group('Agent Loop with Tools', () {
-    late final Directory tempProjectDir;
-    late final TestApiClient client;
-    late final ApiClient? realApi;
-    late final TestAgent agent;
-
     const readmeFilename = 'README.md';
     final readmeFile = fileSystem.file(readmeFilename);
     const testPhrase = 'The cat sat on the mat';
@@ -42,7 +45,7 @@ void main() {
     });
 
     tearDown(() async {
-      await agent.provideInput(null);
+      await _agent?.provideInput(null);
       tryDelete(tempProjectDir);
     });
 

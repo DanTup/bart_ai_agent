@@ -96,7 +96,7 @@ class TestApiClient implements ApiClient {
   APIResponse _loadAndValidateResponse(List<Message> incomingMessages, int callIndex) {
     final file = dataDirectory.childFile('$conversationId.json');
     if (!file.existsSync()) {
-      throw Exception(
+      throw StateError(
         'No saved conversation found for conversationId: $conversationId in "${file.path}"',
       );
     }

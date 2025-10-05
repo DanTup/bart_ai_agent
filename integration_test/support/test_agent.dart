@@ -12,11 +12,13 @@ class TestAgent extends Agent {
   final Set<Directory> allowedDirectories;
 
   /// The last tool call made by the assistant.
-  ToolCall get lastToolCall => _lastToolCall ?? (throw 'No tool calls made');
+  ToolCall get lastToolCall =>
+      _lastToolCall ?? (throw StateError('No tool calls have been made yet.'));
   ToolCall? _lastToolCall;
 
   /// The last output message from the assistant.
-  String get lastAssistantMessage => _lastAssistantMessage ?? (throw 'No assistant messages');
+  String get lastAssistantMessage =>
+      _lastAssistantMessage ?? (throw StateError('No assistant messages have been received yet.'));
   String? _lastAssistantMessage;
 
   Completer<String?>? _inputCompleter;
@@ -61,7 +63,7 @@ class TestAgent extends Agent {
   Future<void> provideInput(String? message) async {
     final completer = _inputCompleter;
     if (completer == null || completer.isCompleted) {
-      throw 'The agent is not waiting for input!';
+      throw StateError('The agent is not waiting for input!');
     }
 
     // Send the message.
