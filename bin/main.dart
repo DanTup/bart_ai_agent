@@ -3,13 +3,13 @@ import 'dart:io' show IOSink, Platform, exit;
 import 'package:args/args.dart';
 import 'package:bart/agents/cli_agent.dart';
 import 'package:bart/agents/web_agent.dart';
+import 'package:bart/api/canned_response_client.dart';
 import 'package:bart/api/ollama_client.dart';
 import 'package:bart/tools/tool_set.dart';
 import 'package:file/local.dart';
 import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
-final client = OllamaClient(model: 'gpt-oss:20b');
 const fileSystem = LocalFileSystem();
 final tools = ToolSet.all(fileSystem);
 
@@ -36,6 +36,12 @@ final parser = ArgParser()
     help: 'Use this port for the web interface if --web was supplied',
   )
   ..addFlag(
+    'canned-responses',
+    negatable: false,
+    help: 'Use a simple bot that replies with canned responses to aid testing',
+    hide: true,
+  )
+  ..addFlag(
     'help',
     abbr: 'h',
     negatable: false,
@@ -46,6 +52,10 @@ final parser = ArgParser()
 Future<void> main(List<String> args) async {
   final argResults = _parseArgs(args);
   final logSink = _setUpLogging(argResults['log-file'] as String?);
+
+  final client = argResults.flag('canned-responses')
+      ? CannedResponseClient()
+      : OllamaClient(model: 'gpt-oss:20b');
 
   final webResourcesPath = fileSystem.path.canonicalize(
     path.join(

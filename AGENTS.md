@@ -27,6 +27,9 @@ A simple AI agent built in Dart that. Works via the terminal or through a simple
 
 - `dart bin/main.dart` - run at the terminal
 - `dart bin/main.dart --web` - run via a simple web app
+- `dart bin/main.dart --canned-responses` - run with a simple bot that provides canned responses
+
+If you find there is no real LLM available in the current environment, use the `--canned-responses` option.
 
 ## Running Tests
 
