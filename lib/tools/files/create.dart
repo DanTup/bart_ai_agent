@@ -28,6 +28,8 @@ class CreateFileTool extends FileTool {
 
   @override
   Object? execute(Map<String, Object?> arguments, ToolContext context) {
+    // TODO(dantup): Validate tool args (here and in other tools) better, so good messages
+    //  are returned to the LLM.
     final filePath = arguments['file_path']! as String;
     final content = arguments['content']! as String;
     final file = fileSystem.file(filePath).absolute;

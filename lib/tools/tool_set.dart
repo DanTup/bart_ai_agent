@@ -10,8 +10,8 @@ import 'package:file/file.dart';
 class ToolSet {
   static List<Tool> fileTools(FileSystem fileSystem) => [
     CreateFileTool(fileSystem),
+    DeleteFileTool(fileSystem),
     EditFileTool(fileSystem),
     ReadFileTool(fileSystem),
-    DeleteFileTool(fileSystem),
   ];
 }

@@ -76,6 +76,10 @@ class EditFileTool extends FileTool {
         if (newFile != null) 'renamed to "$newFilePath"',
       ];
 
+      if (changes.isEmpty) {
+        throw ToolException('At least one of "new_string" or "new_file_path" should be provided."');
+      }
+
       return 'File "$filePath" successfully ${changes.join(" and ")}.';
     } catch (e) {
       if (e is ToolException) rethrow;

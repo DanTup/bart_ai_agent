@@ -11,7 +11,7 @@ abstract class FileTool extends Tool {
     if (!context.isAllowed(file)) {
       throw ToolException(
         'File "${file.path}" is outside the allowed directories. '
-        'Allowed directories are ${context.allowedDirectories.map((d) => '"$d"').join(", ")}.',
+        'Allowed directories are ${context.allowedDirectories.map((d) => '"${d.path}"').join(", ")}.',
       );
     }
   }

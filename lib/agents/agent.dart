@@ -127,15 +127,15 @@ abstract class Agent {
   Object? _executeTool(String name, Map<String, Object?> arguments) {
     final tool = tools.firstWhere(
       (t) => t.name == name,
-      orElse: () => throw Exception('Unknown tool: $name'),
+      orElse: () => throw ToolException('Unknown tool "$name"'),
     );
     try {
       return tool.execute(
         arguments,
         ToolContext(allowedDirectories: allowedDirectories),
       );
-    } on ToolException catch (e) {
-      return e.message;
+    } on Exception catch (e) {
+      return e.toString();
     }
   }
 }
