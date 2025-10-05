@@ -1,0 +1,5 @@
+_sandbox/*
+!_sandbox/README.md
+.dart_tool/
+logs/
+pubspec.lock

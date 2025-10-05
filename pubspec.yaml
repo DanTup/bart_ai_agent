@@ -1,0 +1,7 @@
+name: bart
+description: A simple AI agent.
+version: 0.0.1
+
+environment:
+  sdk: ^3.9.0
+
