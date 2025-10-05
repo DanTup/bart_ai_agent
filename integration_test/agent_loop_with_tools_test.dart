@@ -10,7 +10,7 @@ import 'support/test_agent.dart';
 import 'support/test_client.dart';
 import 'support/utils.dart';
 
-const mode = TestMode.recordSnapshots;
+const mode = TestMode.useSnapshots;
 
 const logLevel = Level.FINE;
 
