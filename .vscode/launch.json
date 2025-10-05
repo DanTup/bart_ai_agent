@@ -1,0 +1,23 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Dart (current file)",
+			"request": "launch",
+			"type": "dart",
+		},
+		{
+			"name": "CLI Agent (_sandbox folder)",
+			"request": "launch",
+			"type": "dart",
+			"cwd": "_sandbox",
+			"program": "../bin/main.dart",
+			"args": [
+				"--log-file",
+				"../logs/trace.txt",
+			],
+			"console": "terminal",
+			"templateFor": "bin"
+		}
+	]
+}
