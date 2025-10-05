@@ -3,11 +3,13 @@ import 'dart:io' show IOSink, exit;
 import 'package:args/args.dart';
 import 'package:bart/agents/cli_agent.dart';
 import 'package:bart/api/ollama_client.dart';
+import 'package:bart/tools/tool_set.dart';
 import 'package:file/local.dart';
 import 'package:logging/logging.dart';
 
 final client = OllamaClient(model: 'gpt-oss:20b');
 const fileSystem = LocalFileSystem();
+final tools = ToolSet.fileTools(fileSystem);
 
 const fileLogLevel = Level.ALL;
 const consoleLogLevel = Level.INFO;
@@ -34,6 +36,8 @@ Future<void> main(List<String> args) async {
   try {
     final agent = CliAgent(
       client: client,
+      fileSystem: fileSystem,
+      tools: tools,
     );
 
     await agent.run();

@@ -22,6 +22,7 @@ class OpenAIClient implements ApiClient {
   @override
   Future<APIResponse> callAPI(
     List<Message> messages,
+    List<ToolDefinition> tools,
   ) async {
     _log.info('Calling LLM API');
 
@@ -32,6 +33,7 @@ class OpenAIClient implements ApiClient {
     final body = {
       'model': model,
       'messages': messages.map(_messageToJson).toList(),
+      'tools': tools.map(_toolDefinitionToJson).toList(),
     };
 
     // Log the request
@@ -84,6 +86,41 @@ class OpenAIClient implements ApiClient {
     return {
       'role': message.role,
       if (message.content != null) 'content': message.content,
+      if (message.toolCallId != null) 'tool_call_id': message.toolCallId,
+      if (message.toolCalls != null) 'tool_calls': message.toolCalls!.map(_toolCallToJson).toList(),
+    };
+  }
+
+  Map<String, Object?> _toolCallToJson(ToolCall toolCall) {
+    return {
+      'id': toolCall.id,
+      'function': _toolFunctionCallToJson(toolCall.function),
+    };
+  }
+
+  Map<String, Object?> _toolFunctionCallToJson(
+    ToolFunctionCall toolFunctionCall,
+  ) {
+    return {
+      'name': toolFunctionCall.name,
+      if (toolFunctionCall.arguments != null) 'arguments': jsonEncode(toolFunctionCall.arguments),
+    };
+  }
+
+  Map<String, Object?> _toolFunctionDefinitionToJson(
+    ToolFunction toolFunction,
+  ) {
+    return {
+      'name': toolFunction.name,
+      'description': toolFunction.description,
+      'parameters': toolFunction.parameters,
+    };
+  }
+
+  Map<String, Object?> _toolDefinitionToJson(ToolDefinition toolDefinition) {
+    return {
+      'type': toolDefinition.type,
+      'function': _toolFunctionDefinitionToJson(toolDefinition.function),
     };
   }
 
@@ -103,6 +140,29 @@ class OpenAIClient implements ApiClient {
     return Message(
       role: json['role']! as String,
       content: json['content'] as String?,
+      toolCallId: json['tool_call_id'] as String?,
+      toolCalls: json['tool_calls'] != null
+          ? (json['tool_calls']! as List).cast<Map<String, Object?>>().map(_jsonToToolCall).toList()
+          : null,
+    );
+  }
+
+  ToolCall _jsonToToolCall(Map<String, Object?> json) {
+    return ToolCall(
+      id: json['id']! as String,
+      function: _jsonToToolFunctionCall(
+        json['function']! as Map<String, Object?>,
+      ),
+    );
+  }
+
+  ToolFunctionCall _jsonToToolFunctionCall(Map<String, Object?> json) {
+    return ToolFunctionCall(
+      name: json['name']! as String,
+      arguments: switch (json['arguments'] as String?) {
+        (final String argumentsJson) => jsonDecode(argumentsJson) as Map<String, Object?>?,
+        null => null,
+      },
     );
   }
 }
