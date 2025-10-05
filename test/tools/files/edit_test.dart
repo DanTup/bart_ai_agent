@@ -1,9 +1,10 @@
 import 'package:bart/tools/files/edit.dart';
-import 'package:bart/tools/tool.dart';
 import 'package:bart/tools/tool_context.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:test/test.dart';
+
+import '../../support/utils.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -55,13 +56,7 @@ void main() {
           'old_string': 'old',
           'new_string': 'new',
         }, context),
-        throwsA(
-          isA<ToolException>().having(
-            (e) => e.message,
-            'message',
-            contains('does not exist'),
-          ),
-        ),
+        throwsToolException(contains('does not exist')),
       );
     });
 
@@ -74,13 +69,7 @@ void main() {
           'old_string': 'outside content',
           'new_string': 'new content',
         }, context),
-        throwsA(
-          isA<ToolException>().having(
-            (e) => e.message,
-            'message',
-            contains('is outside the allowed directories'),
-          ),
-        ),
+        throwsToolException(contains('is outside the allowed directories')),
       );
     });
 
@@ -94,13 +83,7 @@ void main() {
           'old_string': 'outside content',
           'new_string': 'new content',
         }, context),
-        throwsA(
-          isA<ToolException>().having(
-            (e) => e.message,
-            'message',
-            contains('is outside the allowed directories'),
-          ),
-        ),
+        throwsToolException(contains('is outside the allowed directories')),
       );
     });
   });

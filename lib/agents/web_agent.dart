@@ -40,8 +40,6 @@ class WebAgent extends Agent {
   Future<void> run({String? initialUserMessage}) async {
     await _startServer();
 
-    // TODO(dantup): This needs to be the actual port we bind to, not what was
-    //  passed here, as it could be zero.
     print('Web agent started. Open http://localhost:$port in your browser.');
     print('Press Ctrl+C to stop.');
 

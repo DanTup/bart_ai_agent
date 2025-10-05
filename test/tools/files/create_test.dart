@@ -1,9 +1,10 @@
 import 'package:bart/tools/files/create.dart';
-import 'package:bart/tools/tool.dart';
 import 'package:bart/tools/tool_context.dart';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:test/test.dart';
+
+import '../../support/utils.dart';
 
 void main() {
   late MemoryFileSystem fileSystem;
@@ -45,13 +46,7 @@ void main() {
 
       expect(
         () => tool.execute({'file_path': file.path, 'content': 'new content'}, context),
-        throwsA(
-          isA<ToolException>().having(
-            (e) => e.message,
-            'message',
-            contains('already exists'),
-          ),
-        ),
+        throwsToolException(contains('already exists')),
       );
     });
 
@@ -60,13 +55,7 @@ void main() {
 
       expect(
         () => tool.execute({'file_path': file.path, 'content': 'outside content'}, context),
-        throwsA(
-          isA<ToolException>().having(
-            (e) => e.message,
-            'message',
-            contains('is outside the allowed directories'),
-          ),
-        ),
+        throwsToolException(contains('is outside the allowed directories')),
       );
     });
 
@@ -79,13 +68,7 @@ void main() {
           'file_path': fileSystem.path.relative(file.path, from: fileSystem.currentDirectory.path),
           'content': 'outside content',
         }, context),
-        throwsA(
-          isA<ToolException>().having(
-            (e) => e.message,
-            'message',
-            contains('is outside the allowed directories'),
-          ),
-        ),
+        throwsToolException(contains('is outside the allowed directories')),
       );
     });
   });
