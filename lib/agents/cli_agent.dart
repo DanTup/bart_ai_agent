@@ -6,6 +6,9 @@ import 'package:bart/output_message.dart';
 
 /// A command-line interface implementation of [Agent].
 class CliAgent extends Agent {
+  @override
+  late final allowedDirectories = {fileSystem.currentDirectory};
+
   String? _workingReason;
   Timer? spinnerTimer;
   var spinnerIndex = 0;
@@ -14,6 +17,8 @@ class CliAgent extends Agent {
   CliAgent({
     required super.client,
     super.systemMessage,
+    required super.fileSystem,
+    required super.tools,
   });
 
   @override

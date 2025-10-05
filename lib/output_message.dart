@@ -11,3 +11,9 @@ class AssistantMessage extends OutputMessage {
 
   AssistantMessage(this.content);
 }
+
+class ToolCall extends OutputMessage {
+  final String toolName;
+
+  ToolCall(this.toolName);
+}
