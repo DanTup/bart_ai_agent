@@ -16,7 +16,7 @@ abstract class Agent {
   final log = Logger('Agent');
 
   @protected
-  final jsonEncode = const JsonEncoder.withIndent('    ').convert;
+  final jsonEncode = const JsonEncoder.withIndent('\t').convert;
 
   /// A client for accessing an LLM.
   final ApiClient client;

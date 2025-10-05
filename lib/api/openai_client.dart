@@ -11,7 +11,7 @@ final _log = Logger('OpenAIClient');
 class OpenAIClient implements ApiClient {
   final String apiUrl, apiKey, model;
 
-  final jsonEncode = const JsonEncoder.withIndent('    ').convert;
+  final jsonEncode = const JsonEncoder.withIndent('\t').convert;
 
   OpenAIClient({
     required this.apiUrl,
