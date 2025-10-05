@@ -149,6 +149,18 @@ class WebAgent extends Agent {
         jsonMessage = jsonEncode({'type': 'assistant', 'content': content});
       case ToolCall(toolName: final toolName):
         jsonMessage = jsonEncode({'type': 'tool_call', 'toolName': toolName});
+      case TodoListUpdate(:final todoList):
+        jsonMessage = jsonEncode({
+          'type': 'todo_list',
+          'tasks': todoList.tasks
+              .map(
+                (task) => {
+                  'task': task.task,
+                  'isComplete': task.isComplete,
+                },
+              )
+              .toList(),
+        });
     }
     sendToClients(jsonMessage);
   }
