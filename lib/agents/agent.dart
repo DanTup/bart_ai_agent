@@ -132,7 +132,7 @@ abstract class Agent {
     try {
       return tool.execute(
         arguments,
-        ToolContext(allowedDirectories: allowedDirectories),
+        ToolContext(allowedDirectories: allowedDirectories, showOutput: showOutput),
       );
     } on Exception catch (e) {
       return e.toString();

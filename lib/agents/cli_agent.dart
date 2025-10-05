@@ -54,6 +54,8 @@ class CliAgent extends Agent {
         print('Agent: $content');
       case ToolCall(toolName: final toolName):
         print('Tool called: $toolName');
+      case TodoListUpdate(:final todoList):
+        print(todoList.formattedTodoList);
     }
 
     if (isWorking) {

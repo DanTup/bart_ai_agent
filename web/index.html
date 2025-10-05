@@ -3,16 +3,22 @@
 <head>
 	<title>Dart Agent</title>
 	<style>
-		body { font-family: Arial, sans-serif; margin: 20px; }
-		#chat { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
-		#input { width: 100%; padding: 5px; resize: vertical; min-height: 40px; }
+		body { font-family: Arial, sans-serif; margin: 20px; background-color: #fafafa; }
+		h1 { margin-top: 0; }
+		.layout { display: flex; gap: 24px; align-items: flex-start; }
+		.chat-panel { flex: 1; display: flex; flex-direction: column; }
+		#chat { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; background-color: #fff; border-radius: 6px; }
+		#input { width: 100%; padding: 8px; resize: vertical; min-height: 40px; border-radius: 4px; border: 1px solid #ccc; }
+		.controls { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+		button { padding: 8px 16px; border-radius: 4px; border: 1px solid #007acc; background-color: #0085ff; color: #fff; cursor: pointer; }
+		button:hover { background-color: #006fdd; }
+		.instructions { font-size: 12px; color: #666; }
 		.message { margin-bottom: 10px; }
-		.assistant { color: blue; }
-		.tool { color: green; }
+		.assistant { color: #0050c8; }
+		.tool { color: #0a7b34; }
 		.working { color: orange; font-style: italic; }
 		.system { color: gray; font-style: italic; }
 		.user { color: black; font-weight: bold; }
-		.instructions { font-size: 12px; color: #666; margin-top: 5px; }
 		.message code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 3px; font-family: 'Courier New', monospace; }
 		.message pre { background-color: #f4f4f4; padding: 10px; border-radius: 3px; overflow-x: auto; margin: 10px 0; }
 		.message pre code { background-color: transparent; padding: 0; }
@@ -24,14 +30,33 @@
 		.message li { margin: 5px 0; }
 		.message a { color: #0066cc; text-decoration: underline; }
 		.message a:hover { color: #004499; }
+		.todo-panel { width: 260px; border: 1px solid #ddd; border-radius: 6px; padding: 12px; background-color: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); position: sticky; top: 20px; }
+		.todo-panel h2 { margin: 0 0 10px 0; font-size: 1.1em; color: #333; }
+		.todo-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
+		.todo-item { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+		.todo-status { font-size: 1.1em; line-height: 1; color: #0085ff; }
+		.todo-item.completed .todo-status { color: #0a7b34; }
+		.todo-item.completed .todo-text { text-decoration: line-through; color: #777; }
+		.todo-empty { font-size: 0.9em; color: #666; }
 	</style>
 </head>
 <body>
 	<h1>Dart Agent</h1>
-	<div id="chat"></div>
-	<textarea id="input" placeholder="Type your message..." onkeydown="handleKeyDown(event)"></textarea>
-	<button onclick="sendMessage()">Send</button>
-	<div class="instructions">Press Enter or Ctrl+Enter to send. Press Shift+Enter for a new line.</div>
+	<div class="layout">
+		<div class="chat-panel">
+			<div id="chat"></div>
+			<textarea id="input" placeholder="Type your message..." onkeydown="handleKeyDown(event)"></textarea>
+			<div class="controls">
+				<button onclick="sendMessage()">Send</button>
+				<div class="instructions">Press Enter or Ctrl+Enter to send. Press Shift+Enter for a new line.</div>
+			</div>
+		</div>
+		<aside class="todo-panel">
+			<h2>Task List</h2>
+			<ul id="todoList" class="todo-list"></ul>
+			<div id="todoEmpty" class="todo-empty">No tasks yet.</div>
+		</aside>
+	</div>
 
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.umd.min.js" integrity="sha512-V6rGY7jjOEUc7q5Ews8mMlretz1Vn2wLdMW/qgABLWunzsLfluM0FwHuGjGQ1lc8jO5vGpGIGFE+rTzB+63HdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
@@ -39,6 +64,8 @@
 		const ws = new WebSocket('ws://' + window.location.host + '/ws');
 		const chat = document.getElementById('chat');
 		const input = document.getElementById('input');
+		const todoListElement = document.getElementById('todoList');
+		const todoEmptyState = document.getElementById('todoEmpty');
 
 		ws.onmessage = function(event) {
 			const data = JSON.parse(event.data);
@@ -46,13 +73,17 @@
 		};
 
 		function displayMessage(message) {
+			if (message.type === 'todo_list') {
+				updateTodoList(message.tasks || []);
+				return;
+			}
+
 			const div = document.createElement('div');
 			div.className = 'message';
 
 			switch (message.type) {
 				case 'assistant':
 					div.className += ' assistant';
-					// TODO(dantup): Sanitize
 					div.innerHTML = 'Agent: ' + marked.parse(message.content);
 					break;
 				case 'tool_call':
@@ -64,13 +95,11 @@
 					div.textContent = 'Working: ' + message.reason;
 					break;
 				case 'stop_working':
-					// Remove working indicator
 					const workingDivs = chat.querySelectorAll('.working');
 					workingDivs.forEach(d => d.remove());
-					break;
+					return;
 				case 'system':
 					div.className += ' system';
-					// TODO(dantup): Sanitize
 					div.innerHTML = marked.parse(message.content);
 					break;
 				case 'user':
@@ -83,12 +112,36 @@
 			chat.scrollTop = chat.scrollHeight;
 		}
 
+		function updateTodoList(tasks) {
+			todoListElement.innerHTML = '';
+			if (!tasks.length) {
+				todoEmptyState.style.display = 'block';
+				return;
+			}
+
+			todoEmptyState.style.display = 'none';
+			tasks.forEach(task => {
+				const item = document.createElement('li');
+				item.className = 'todo-item' + (task.isComplete ? ' completed' : '');
+
+				const status = document.createElement('span');
+				status.className = 'todo-status';
+				status.textContent = task.isComplete ? '✓' : '○';
+
+				const text = document.createElement('span');
+				text.className = 'todo-text';
+				text.textContent = task.task;
+
+				item.appendChild(status);
+				item.appendChild(text);
+				todoListElement.appendChild(item);
+			});
+		}
+
 		function sendMessage() {
 			const content = input.value.trim();
 			if (content) {
-				// Display user message
 				displayMessage({ type: 'user', content: content });
-				// Send to server
 				ws.send(JSON.stringify({ type: 'input', content: content }));
 				input.value = '';
 			}
@@ -100,7 +153,6 @@
 					event.preventDefault();
 					sendMessage();
 				}
-				// If Shift+Enter, allow default behavior (newline)
 			}
 		}
 	</script>

@@ -17,7 +17,7 @@ void main() {
     fileSystem = MemoryFileSystem();
     tempDir = fileSystem.systemTempDirectory.createTempSync('test_edit_').absolute;
     outsideDir = fileSystem.systemTempDirectory.createTempSync('outside_').absolute;
-    context = ToolContext(allowedDirectories: {tempDir});
+    context = ToolContext.test(allowedDirectories: {tempDir});
     tool = EditFileTool(fileSystem);
   });
 

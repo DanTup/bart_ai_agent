@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 
 final client = OllamaClient(model: 'gpt-oss:20b');
 const fileSystem = LocalFileSystem();
-final tools = ToolSet.fileTools(fileSystem);
+final tools = ToolSet.all(fileSystem);
 
 const fileLogLevel = Level.ALL;
 const consoleLogLevel = Level.INFO;
