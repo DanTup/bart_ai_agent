@@ -1,0 +1,11 @@
+{
+	"explorer.excludeGitIgnore": false,
+	"[dart]": {
+		"editor.rulers": [
+			100
+		]
+	},
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": "explicit"
+	}
+}
