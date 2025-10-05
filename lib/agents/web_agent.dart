@@ -19,10 +19,9 @@ class WebAgent extends Agent {
   final int port;
   final FileSystem webResourceFileSystem;
   final String webResourceRootPath;
-  WebSocket? _webSocket;
+  final _webSockets = <WebSocket>[];
   final _userInputQueue = <String>[];
   Completer<String?>? _userInputCompleter;
-  final _outputController = StreamController<String>();
 
   @override
   late final allowedDirectories = {fileSystem.currentDirectory};
@@ -40,6 +39,7 @@ class WebAgent extends Agent {
   @override
   Future<void> run({String? initialUserMessage}) async {
     await _startServer();
+
     // TODO(dantup): This needs to be the actual port we bind to, not what was
     //  passed here, as it could be zero.
     print('Web agent started. Open http://localhost:$port in your browser.');
@@ -61,9 +61,10 @@ class WebAgent extends Agent {
 
     if (requestPath == '/ws') {
       // Handle WebSocket upgrade
-      _webSocket = await WebSocketTransformer.upgrade(request);
+      final webSocket = await WebSocketTransformer.upgrade(request);
+      _webSockets.add(webSocket);
 
-      _webSocket!.listen(
+      webSocket.listen(
         (message) {
           final data = jsonDecode(message as String) as Map<String, Object?>;
           if (data['type'] == 'input') {
@@ -71,21 +72,14 @@ class WebAgent extends Agent {
           }
         },
         onDone: () {
-          _handleUserInput(null); // Signal end
+          _webSockets.remove(webSocket);
         },
       );
-
-      // Send outputs to the client
-      // TODO(dantup): This fails on page refresh
-      _outputController.stream.listen((message) {
-        _webSocket?.add(message);
-      });
     } else {
       final resourcePath = webResourceFileSystem.path.join(
         webResourceRootPath,
         requestPath.substring(1).split('/').join(webResourceFileSystem.path.separator),
       );
-      print(resourcePath);
       final resourceFile = webResourceFileSystem.file(resourcePath);
       if (webResourceFileSystem.path.isWithin(webResourceRootPath, resourcePath) &&
           await resourceFile.exists()) {
@@ -93,7 +87,6 @@ class WebAgent extends Agent {
         request.response
           ..headers.contentType = contentType
           ..add(await resourceFile.readAsBytes());
-        await request.response.close();
       } else {
         log.warning('Could not find $requestPath');
         request.response
@@ -101,6 +94,12 @@ class WebAgent extends Agent {
           ..write('File not found');
       }
       await request.response.close();
+    }
+  }
+
+  void sendToClients(String message) {
+    for (final ws in _webSockets) {
+      ws.add(message);
     }
   }
 
@@ -122,12 +121,12 @@ class WebAgent extends Agent {
 
   @override
   void startWorking(String reason) {
-    _outputController.add(jsonEncode({'type': 'working', 'reason': reason}));
+    sendToClients(jsonEncode({'type': 'working', 'reason': reason}));
   }
 
   @override
   void stopWorking() {
-    _outputController.add(jsonEncode({'type': 'stop_working'}));
+    sendToClients(jsonEncode({'type': 'stop_working'}));
   }
 
   @override
@@ -142,7 +141,7 @@ class WebAgent extends Agent {
 
   @override
   Future<void> showOutput(OutputMessage message) async {
-    // TODO(dantup): Change this to send the object over as JSON and let the
+    // TODO(dantup): Change this to send the OutputMessage over as JSON and let the
     //  frontend handle with the real types.
     String jsonMessage;
     switch (message) {
@@ -153,6 +152,6 @@ class WebAgent extends Agent {
       case ToolCall(toolName: final toolName):
         jsonMessage = jsonEncode({'type': 'tool_call', 'toolName': toolName});
     }
-    _outputController.add(jsonMessage);
+    sendToClients(jsonMessage);
   }
 }

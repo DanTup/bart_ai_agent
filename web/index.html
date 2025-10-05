@@ -52,6 +52,7 @@
 			switch (message.type) {
 				case 'assistant':
 					div.className += ' assistant';
+					// TODO(dantup): Sanitize
 					div.innerHTML = 'Agent: ' + marked.parse(message.content);
 					break;
 				case 'tool_call':
@@ -69,6 +70,7 @@
 					break;
 				case 'system':
 					div.className += ' system';
+					// TODO(dantup): Sanitize
 					div.innerHTML = marked.parse(message.content);
 					break;
 				case 'user':

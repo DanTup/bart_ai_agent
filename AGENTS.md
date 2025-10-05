@@ -26,7 +26,7 @@ A simple AI agent built in Dart that. Works via the terminal or through a simple
 ## Basic Usage
 
 - `dart bin/main.dart` - run at the terminal
-- `dart bin/main.dart --web` - run via a simple web app (defaults to port 8080)
+- `dart bin/main.dart --web` - run via a simple web app
 
 ## Running Tests
 
