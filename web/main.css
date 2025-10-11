@@ -1,0 +1,137 @@
+body {
+	font-family: Arial, sans-serif;
+	background-color: #f6f7f8;
+	color: #333;
+	margin: 0;
+	padding: 0;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+}
+
+header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	border-bottom: 1px solid #ddd;
+	padding: 1rem;
+}
+
+header h2 {
+	margin: 0;
+	font-size: 1.5rem;
+}
+
+main {
+	flex: 1;
+	display: flex;
+	overflow: hidden;
+}
+
+#chat {
+	flex: 1;
+	padding: 1rem;
+	overflow-y: auto;
+}
+
+#todoListContainer {
+	width: 360px;
+	border-left: 1px solid #ddd;
+	display: flex;
+	flex-direction: column;
+}
+
+#todoListContainer.hidden {
+	display: none;
+}
+
+#todoList {
+	flex: 1;
+	margin: 0;
+	padding: 1rem;
+	overflow-y: auto;
+}
+
+.input-area {
+	border-top: 1px solid #ddd;
+	padding: 1rem;
+	position: relative;
+}
+
+.input-area textarea {
+	width: 100%;
+	padding: 0.5rem;
+	border: 1px solid #ccc;
+	border-radius: 0.25rem;
+	resize: none;
+}
+
+.input-area button {
+	margin-top: 0.5rem;
+	padding: 0.5rem 1rem;
+	background-color: #1173d4;
+	color: white;
+	border: none;
+	border-radius: 0.25rem;
+	cursor: pointer;
+	position: absolute;
+	bottom: 1.5rem;
+	right: 1.5rem;
+}
+
+.input-area button:hover {
+	background-color: #0d5aa1;
+}
+
+.message {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+	margin-bottom: 1rem;
+}
+
+.message.you {
+	align-items: flex-end;
+}
+
+.message .content {
+	max-width: 70%;
+	border-radius: 0.5rem;
+	background-color: #e5e5e5;
+}
+
+.message .content p {
+	margin: 0.75rem;
+}
+
+.message.you .content {
+	background-color: #1173d4;
+	color: white;
+}
+
+.todo-item {
+	display: flex;
+	align-items: center;
+	padding: 0.5rem;
+	border-radius: 0.25rem;
+}
+
+.todo-item:hover {
+	background-color: #f0f0f0;
+}
+
+.todo-item input {
+	margin-right: 0.5rem;
+}
+
+.todo-item.completed .task-text {
+	text-decoration: line-through;
+	color: #666;
+}
+
+.container {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+}

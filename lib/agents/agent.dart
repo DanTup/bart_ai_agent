@@ -90,8 +90,10 @@ abstract class Agent {
         final choice = response.choices[0];
         final assistantMessage = choice.message;
 
-        messages.add(assistantMessage);
-        showOutput(AssistantMessage(assistantMessage.content ?? ''));
+        if (assistantMessage.content case final content? && != '') {
+          messages.add(assistantMessage);
+          showOutput(AssistantMessage(content));
+        }
 
         final toolCalls = assistantMessage.toolCalls;
         if (toolCalls != null) {

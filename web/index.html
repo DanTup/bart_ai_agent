@@ -1,161 +1,61 @@
-<!DOCTYPE html>
 <html>
 <head>
-	<title>Dart Agent</title>
-	<style>
-		body { font-family: Arial, sans-serif; margin: 20px; background-color: #fafafa; }
-		h1 { margin-top: 0; }
-		.layout { display: flex; gap: 24px; align-items: flex-start; }
-		.chat-panel { flex: 1; display: flex; flex-direction: column; }
-		#chat { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; background-color: #fff; border-radius: 6px; }
-		#input { width: 100%; padding: 8px; resize: vertical; min-height: 40px; border-radius: 4px; border: 1px solid #ccc; }
-		.controls { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
-		button { padding: 8px 16px; border-radius: 4px; border: 1px solid #007acc; background-color: #0085ff; color: #fff; cursor: pointer; }
-		button:hover { background-color: #006fdd; }
-		.instructions { font-size: 12px; color: #666; }
-		.message { margin-bottom: 10px; }
-		.assistant { color: #0050c8; }
-		.tool { color: #0a7b34; }
-		.working { color: orange; font-style: italic; }
-		.system { color: gray; font-style: italic; }
-		.user { color: black; font-weight: bold; }
-		.message code { background-color: #f4f4f4; padding: 2px 4px; border-radius: 3px; font-family: 'Courier New', monospace; }
-		.message pre { background-color: #f4f4f4; padding: 10px; border-radius: 3px; overflow-x: auto; margin: 10px 0; }
-		.message pre code { background-color: transparent; padding: 0; }
-		.message h1, .message h2, .message h3 { margin: 10px 0 5px 0; color: #333; }
-		.message h1 { font-size: 1.4em; }
-		.message h2 { font-size: 1.2em; }
-		.message h3 { font-size: 1.1em; }
-		.message ul { margin: 10px 0; padding-left: 20px; }
-		.message li { margin: 5px 0; }
-		.message a { color: #0066cc; text-decoration: underline; }
-		.message a:hover { color: #004499; }
-		.todo-panel { width: 260px; border: 1px solid #ddd; border-radius: 6px; padding: 12px; background-color: #fff; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05); position: sticky; top: 20px; }
-		.todo-panel h2 { margin: 0 0 10px 0; font-size: 1.1em; color: #333; }
-		.todo-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 8px; }
-		.todo-item { display: flex; align-items: center; gap: 10px; font-size: 14px; }
-		.todo-status { font-size: 1.1em; line-height: 1; color: #0085ff; }
-		.todo-item.completed .todo-status { color: #0a7b34; }
-		.todo-item.completed .todo-text { text-decoration: line-through; color: #777; }
-		.todo-empty { font-size: 0.9em; color: #666; }
-	</style>
+	<title>Bart</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.umd.min.js" integrity="sha512-V6rGY7jjOEUc7q5Ews8mMlretz1Vn2wLdMW/qgABLWunzsLfluM0FwHuGjGQ1lc8jO5vGpGIGFE+rTzB+63HdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<link rel="stylesheet" href="main.css">
 </head>
 <body>
-	<h1>Dart Agent</h1>
-	<div class="layout">
-		<div class="chat-panel">
+	<div class="container">
+		<!-- Header -->
+		<header>
+			<h2>Bart</h2>
+		</header>
+
+		<!-- Main content -->
+		<main>
 			<div id="chat"></div>
-			<textarea id="input" placeholder="Type your message..." onkeydown="handleKeyDown(event)"></textarea>
-			<div class="controls">
-				<button onclick="sendMessage()">Send</button>
-				<div class="instructions">Press Enter or Ctrl+Enter to send. Press Shift+Enter for a new line.</div>
-			</div>
+
+			<!-- TODO List Sidebar -->
+			<aside id="todoListContainer" class="hidden">
+				<ul id="todoList"></ul>
+			</aside>
+		</main>
+
+		<!-- Input area -->
+		<div class="input-area">
+			<textarea id="input" placeholder="Type your message...
+
+&lt;Enter&gt; send
+&lt;Shift+Enter&gt; insert new line" rows="4" onkeydown="handleKeyDown(event)"></textarea>
+			<button onclick="sendMessage()">Send</button>
 		</div>
-		<aside class="todo-panel">
-			<h2>Task List</h2>
-			<ul id="todoList" class="todo-list"></ul>
-			<div id="todoEmpty" class="todo-empty">No tasks yet.</div>
-		</aside>
 	</div>
 
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/16.3.0/lib/marked.umd.min.js" integrity="sha512-V6rGY7jjOEUc7q5Ews8mMlretz1Vn2wLdMW/qgABLWunzsLfluM0FwHuGjGQ1lc8jO5vGpGIGFE+rTzB+63HdA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<!-- Message Templates -->
+	<template id="message-template">
+		<div class="message">
+			<div class="participant"></div>
+			<div class="content"></div>
+		</div>
+	</template>
 
-	<script>
-		const ws = new WebSocket('ws://' + window.location.host + '/ws');
-		const chat = document.getElementById('chat');
-		const input = document.getElementById('input');
-		const todoListElement = document.getElementById('todoList');
-		const todoEmptyState = document.getElementById('todoEmpty');
+	<template id="tool-call-message-template">
+		<div class="message">
+			<div>Bart</div>
+			<details>
+				<summary>Tool "<span class="tool-name"></span>" called</summary>
+				<div class="tool-details">Waiting for result...</div>
+			</details>
+		</div>
+	</template>
 
-		ws.onmessage = function(event) {
-			const data = JSON.parse(event.data);
-			displayMessage(data);
-		};
+	<template id="todo-item-template">
+		<li class="todo-item">
+			<input type="checkbox" disabled>
+			<span class="task-text"></span>
+		</li>
+	</template>
 
-		function displayMessage(message) {
-			const div = document.createElement('div');
-			div.className = 'message';
-
-			switch (message.type) {
-				case 'system':
-					div.className += ' system';
-					// TODO(dantup): Sanitize
-					div.innerHTML = 'System: ' + marked.parse(message.content);
-					break;
-				case 'user':
-					// TODO(dantup): Sanitize
-					div.className += ' user';
-					div.textContent = 'You: ' + marked.parse(message.content);
-					break;
-				case 'assistant':
-					div.className += ' assistant';
-					// TODO(dantup): Sanitize
-					div.innerHTML = 'Agent: ' + marked.parse(message.content);
-					break;
-				case 'tool_call':
-					div.className += ' tool';
-					div.textContent = 'Tool called: ' + message.toolName;
-					break;
-				case 'working':
-					div.className += ' working';
-					div.textContent = 'Working: ' + message.reason;
-					break;
-				case 'stop_working':
-					const workingDivs = chat.querySelectorAll('.working');
-					workingDivs.forEach(d => d.remove());
-					return;
-				case 'todo_list':
-					updateTodoList(message.tasks || []);
-					return;
-			}
-
-			chat.appendChild(div);
-			chat.scrollTop = chat.scrollHeight;
-		}
-
-		function updateTodoList(tasks) {
-			todoListElement.innerHTML = '';
-			if (!tasks.length) {
-				todoEmptyState.style.display = 'block';
-				return;
-			}
-
-			todoEmptyState.style.display = 'none';
-			tasks.forEach(task => {
-				const item = document.createElement('li');
-				item.className = 'todo-item' + (task.isComplete ? ' completed' : '');
-
-				const status = document.createElement('span');
-				status.className = 'todo-status';
-				status.textContent = task.isComplete ? '✓' : '○';
-
-				const text = document.createElement('span');
-				text.className = 'todo-text';
-				text.textContent = task.task;
-
-				item.appendChild(status);
-				item.appendChild(text);
-				todoListElement.appendChild(item);
-			});
-		}
-
-		function sendMessage() {
-			const content = input.value.trim();
-			if (content) {
-				displayMessage({ type: 'user', content: content });
-				ws.send(JSON.stringify({ type: 'input', content: content }));
-				input.value = '';
-			}
-		}
-
-		function handleKeyDown(event) {
-			if (event.key === 'Enter') {
-				if (event.ctrlKey || !event.shiftKey) {
-					event.preventDefault();
-					sendMessage();
-				}
-			}
-		}
-	</script>
+	<script src="main.js"></script>
 </body>
 </html>

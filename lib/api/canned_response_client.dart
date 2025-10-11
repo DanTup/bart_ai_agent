@@ -1,8 +1,5 @@
 import 'package:bart/api/client.dart';
 import 'package:bart/api/types.dart';
-import 'package:logging/logging.dart';
-
-final _log = Logger('CannedResponseClient');
 
 /// A client that provides canned responses based on simple string matching
 ///
